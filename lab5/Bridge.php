@@ -8,7 +8,7 @@ interface Renderer
     public function renderField(string $name, string $value): string;
 }
 
-final class HTMLRenderer implements Renderer
+class HTMLRenderer implements Renderer
 {
     public function renderTitle(string $title): string {}
     public function renderText(string $text): string {}
@@ -16,7 +16,7 @@ final class HTMLRenderer implements Renderer
     public function renderField(string $name, string $value): string {}
 }
 
-final class JsonRenderer implements Renderer
+class JsonRenderer implements Renderer
 {
     public function renderTitle(string $title): string {}
     public function renderText(string $text): string {}
@@ -24,7 +24,7 @@ final class JsonRenderer implements Renderer
     public function renderField(string $name, string $value): string {}
 }
 
-final class XmlRenderer implements Renderer
+class XmlRenderer implements Renderer
 {
     public function renderTitle(string $title): string {}
     public function renderText(string $text): string {}
@@ -34,26 +34,35 @@ final class XmlRenderer implements Renderer
 
 abstract class Page
 {
-    public function __construct(protected Renderer $renderer) {}
+    protected Renderer $renderer;
+
+    public function setRenderer(Renderer $renderer): void {}
 
     abstract public function view(): string;
 }
 
-final class SimplePage extends Page
+class SimplePage extends Page
 {
-    public function __construct(Renderer $renderer, private string $title, private string $content) {}
+    private string $title;
+    private string $content;
+
+    public function setTitle(string $title): void {}
+    public function setContent(string $content): void {}
 
     public function view(): string {}
 }
 
-final class Product
+class Product
 {
-    public function __construct(
-        private string $id,
-        private string $name,
-        private string $description,
-        private string $image
-    ) {}
+    private string $id;
+    private string $name;
+    private string $description;
+    private string $image;
+
+    public function setId(string $id): void {}
+    public function setName(string $name): void {}
+    public function setDescription(string $description): void {}
+    public function setImage(string $image): void {}
 
     public function getId(): string {}
     public function getName(): string {}
@@ -61,21 +70,32 @@ final class Product
     public function getImage(): string {}
 }
 
-final class ProductPage extends Page
+class ProductPage extends Page
 {
-    public function __construct(Renderer $renderer, private Product $product) {}
+    private Product $product;
+
+    public function setProduct(Product $product): void {}
 
     public function view(): string {}
 }
 
-$product = new Product('1', 'Ноутбук', 'Потужний ноутбук для роботи', 'laptop.jpg');
+$product = new Product();
+$product->setId('1');
+$product->setName('Ноутбук');
+$product->setDescription('Потужний ноутбук для роботи');
+$product->setImage('laptop.jpg');
 
 $renderers = [new HTMLRenderer(), new JsonRenderer(), new XmlRenderer()];
 
 foreach ($renderers as $renderer) {
-    $simplePage = new SimplePage($renderer, 'Про нас', 'Текст сторінки');
+    $simplePage = new SimplePage();
+    $simplePage->setRenderer($renderer);
+    $simplePage->setTitle('Про нас');
+    $simplePage->setContent('Текст сторінки');
     echo $simplePage->view();
 
-    $productPage = new ProductPage($renderer, $product);
+    $productPage = new ProductPage();
+    $productPage->setRenderer($renderer);
+    $productPage->setProduct($product);
     echo $productPage->view();
 }
